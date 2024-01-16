@@ -1,9 +1,8 @@
 const express = require("express")
 const server = express()
-const { getTopics } = require('./controllers/topics.controller.js')
+const {getTopics, getEndpoints} = require("./index.js")
 
 server.get('/api/topics', getTopics)
-
-// what if the response is empty? shouldn't send a 200 surely
+server.get('/api', getEndpoints)
 
 module.exports = server
