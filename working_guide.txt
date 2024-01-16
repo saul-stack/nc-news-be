@@ -8,9 +8,16 @@ Controller
 
 
 GET /api/topics
+Responds 200 with array 'topics' of objects with properties: 'slug', 'description'
 
-Responds with array "topics" of 
-                                objects with properties: slug, description
+GET /api
+Responds 200 with object 'endpoints' of objects representing available endpoints, with properties:
 
+    'path',             - path/name of the endpoint
+    'queries'           - which queries are accepted
+    'method',           - accepted request methods
+    'format'            - what format the request body needs to adhere to.
+    'description'       - a brief description of the purpose and functionality of the endpoint.
+    'example response'  - what an example response looks like. 
 
-connection file
+    
