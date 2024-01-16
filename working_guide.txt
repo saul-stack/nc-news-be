@@ -1,12 +1,3 @@
-USE MVC
-Model
-    contains functions 
-View
-    server.js
-Controller
-
-
-
 GET /api/topics
 Responds 200 with array 'topics' of objects with properties: 'slug', 'description'
 
