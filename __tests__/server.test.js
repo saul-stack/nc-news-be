@@ -1,6 +1,8 @@
 const server = require('../server.js')
 const request = require('supertest')
 const database = require("../db/connection.js")
+const fs = require("fs/promises")
+const { requestArticles } = require('../models/articles.model.js')
 
 afterAll(() => database.end())
 
@@ -67,44 +69,83 @@ describe('/api/topics', () => {
     
 })
 
-describe('/api/articles/:article_id', () => {
-
-    describe('GET /api/articles/:article_id', () => {
-
-        test('responds (200) with an object with expected properties', () => {
-
+describe('/api/articles', () => {
+    describe('GET /api/articles', () => {
+        test('Responds (200) with an array of objects', () => {
             return request(server)
-            .get('/api/articles/1')
+            .get('/api/articles')
             .expect(200)
-            .then((response) => {
-                expect(response.body.hasOwnProperty("author"))
-                expect(response.body.hasOwnProperty("title"))
-                expect(response.body.hasOwnProperty("article_id"))
-                expect(response.body.hasOwnProperty("body"))
-                expect(response.body.hasOwnProperty("topic"))
-                expect(response.body.hasOwnProperty("created_at"))
-                expect(response.body.hasOwnProperty("votes"))
-                expect(response.body.hasOwnProperty("article_img_url"))
-            })    
-        })
-
-        test('responds (404) "Not found" when article_id valid format but not present in database', () => {
-            
-            return request(server)
-            .get('/api/articles/9999')
-            .expect(404)
-            .then((response) => {
-                expect((response.body.msg)).toBe("Not found")
+            .then((articles) => {
+                expect(Array.isArray(articles.body)).toBe(true)
+                articles.body.forEach((article) => {
+                    expect(typeof article).toBe("object")
+                })
             })
         })
 
-        test('responds (400) "Bad request" when article_id not correct format', () => {
-            
+        test('each object in the array has correct keys', () => {
             return request(server)
-            .get('/api/articles/article1')
-            .expect(400)
-            .then((response) => {
-                expect((response.body.msg)).toBe("Bad request")
+            .get('/api/articles')
+            .then((articles) => {
+
+                expect(articles.body.length > 0).toBe(true)
+
+                articles.body.forEach((article) => {
+
+                    expect(article.hasOwnProperty("author")).toBe(true)
+                    expect(article.hasOwnProperty("title")).toBe(true)
+                    expect(article.hasOwnProperty("article_id")).toBe(true)
+                    expect(article.hasOwnProperty("topic")).toBe(true)
+                    expect(article.hasOwnProperty("created_at")).toBe(true)
+                    expect(article.hasOwnProperty("votes")).toBe(true)
+                    expect(article.hasOwnProperty("article_img_url")).toBe(true)
+                    expect(article.hasOwnProperty("comment_count")).toBe(true)
+
+                    expect(article.hasOwnProperty("body")).toBe(false)
+                })
+            })
+        })
+
+        describe('/api/articles/:article_id', () => {
+
+            describe('GET /api/articles/:article_id', () => {
+
+                test('responds (200) with an object with expected properties', () => {
+
+                    return request(server)
+                    .get('/api/articles/1')
+                    .expect(200)
+                    .then((response) => {
+                        expect(response.body.hasOwnProperty("author"))
+                        expect(response.body.hasOwnProperty("title"))
+                        expect(response.body.hasOwnProperty("article_id"))
+                        expect(response.body.hasOwnProperty("body"))
+                        expect(response.body.hasOwnProperty("topic"))
+                        expect(response.body.hasOwnProperty("created_at"))
+                        expect(response.body.hasOwnProperty("votes"))
+                        expect(response.body.hasOwnProperty("article_img_url"))
+                    })    
+                })
+
+                test('responds (404) "Not found" when article_id valid format but not present in database', () => {
+                    
+                    return request(server)
+                    .get('/api/articles/9999')
+                    .expect(404)
+                    .then((response) => {
+                        expect((response.body.msg)).toBe("Not found")
+                    })
+                })
+
+                test('responds (400) "Bad request" when article_id not correct format', () => {
+                    
+                    return request(server)
+                    .get('/api/articles/article1')
+                    .expect(400)
+                    .then((response) => {
+                        expect((response.body.msg)).toBe("Bad request")
+                    })
+                })
             })
         })
     })

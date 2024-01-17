@@ -1,4 +1,4 @@
-const { requestArticleById } = require("../models/articles.model")
+const { requestArticleById, requestArticles, requestComments } = require("../models/articles.model")
 
 exports.getArticleById = (request, response) => {
     const requestedArticleId = request.params.article_id
@@ -13,3 +13,18 @@ exports.getArticleById = (request, response) => {
 
     })
 }
+
+exports.getArticles = (request, response) => {
+
+    requestArticles()
+    .then((articles) => {
+        return response.status(200).send(articles)
+    })
+    
+}
+
+//for each article object, get its article_id
+
+//commentCount = (query comments table for all results where article_id matches).length
+
+//article.comment_count = commentCount
