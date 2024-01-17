@@ -117,21 +117,24 @@ describe('/api/articles', () => {
                 .get('/api/articles/1')
                 .expect(200)
                 .then((response) => {
-                    expect(response.body.hasOwnProperty("author"))
-                    expect(response.body.hasOwnProperty("title"))
-                    expect(response.body.hasOwnProperty("article_id"))
-                    expect(response.body.hasOwnProperty("body"))
-                    expect(response.body.hasOwnProperty("topic"))
-                    expect(response.body.hasOwnProperty("created_at"))
-                    expect(response.body.hasOwnProperty("votes"))
-                    expect(response.body.hasOwnProperty("article_img_url"))
+                    console.log(response.body)
+                    expect(response.body.hasOwnProperty("author")).toBe(true)
+                    expect(response.body.hasOwnProperty("title")).toBe(true)
+                    expect(response.body.hasOwnProperty("article_id")).toBe(true)
+                    expect(response.body.hasOwnProperty("body")).toBe(true)
+                    expect(response.body.hasOwnProperty("topic")).toBe(true)
+                    expect(response.body.hasOwnProperty("created_at")).toBe(true)
+                    expect(response.body.hasOwnProperty("votes")).toBe(true)
+                    expect(response.body.hasOwnProperty("article_img_url")).toBe(true)
+                    expect(response.body.hasOwnProperty("comment_count")).toBe(true)
+
                 })    
             })
 
             test('responds (404) "Not found" when article_id valid format but not present in database', () => {
                 
                 return request(server)
-                .get('/api/articles/9999')
+                .get('/api/articles/99999')
                 .expect(404)
                 .then((response) => {
                     expect((response.body.msg)).toBe("Not found")
@@ -162,8 +165,8 @@ describe('/api/articles', () => {
                 expect (Array.isArray(comments.body)).toBe(true)
 
                 comments.body.forEach((comment) => {
-                    expect(comment.hasOwnProperty("comment_id"))
                     expect(comment.hasOwnProperty("votes"))
+                    expect(comment.hasOwnProperty("comment_id"))
                     expect(comment.hasOwnProperty("created_at"))
                     expect(comment.hasOwnProperty("author"))
                     expect(comment.hasOwnProperty("body"))
@@ -174,7 +177,9 @@ describe('/api/articles', () => {
 
         })
 
-        test.only('responds (404) "Not found" when article_id valid format but not present in database', () => {
+        //test.only('responds (204) "No content" when article_id present in database, but no comments')
+
+        test('responds (404) "Not found" when article_id valid format but not present in database', () => {
                 
             return request(server)
             .get('/api/articles/9999/comments')
