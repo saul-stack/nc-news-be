@@ -31,3 +31,17 @@ exports.requestArticles = () => {
     })
 
 }
+
+exports.requestCommentsByArticleId = (requestedArticleId) => {
+    return database.query(`SELECT * FROM comments WHERE article_id = ${requestedArticleId} ORDER BY created_at desc;`)
+    .then((result) => {
+        if(!result.rows) return Promise.reject({"err": "404"})
+        return (result.rows)
+    })
+    .catch((err)=> {
+
+        next(err)
+    })
+
+   
+}

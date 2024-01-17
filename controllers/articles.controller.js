@@ -1,16 +1,19 @@
-const { requestArticleById, requestArticles, requestComments } = require("../models/articles.model")
+const { requestArticleById, requestArticles, requestCommentsByArticleId } = require("../models/articles.model")
 
-exports.getArticleById = (request, response) => {
+exports.getArticleById = (request, response, next) => {
     const requestedArticleId = request.params.article_id
 
-    if (isNaN(requestedArticleId)) return response.status(400).send({msg: "Bad request"})
+    if (isNaN(requestedArticleId)) return next({"code": "400"})
     
     requestArticleById(requestedArticleId)
     .then((requestedArticle) => {
 
-        if (requestedArticle === undefined) return response.status(404).send({msg: "Not found"})
+        if (!requestedArticle) return Promise.reject ({code: "404"})
        return response.status(200).send(requestedArticle)
 
+    })
+    .catch((err) => {
+        next(err)
     })
 }
 
@@ -23,8 +26,20 @@ exports.getArticles = (request, response) => {
     
 }
 
-//for each article object, get its article_id
+exports.getCommentsByArticleId = (request, response, next) => {
 
-//commentCount = (query comments table for all results where article_id matches).length
+    const requestedArticleId = request.params.article_id
 
-//article.comment_count = commentCount
+    if (isNaN(Number(requestedArticleId))) return next({"code": "400"})
+
+    requestCommentsByArticleId(requestedArticleId)
+    .then((comments) => {
+        if (!comments[0]) return Promise.reject({"code": "404"})
+        return response.status(200).send(comments)
+    })
+    .catch((err)=> {
+
+        next(err)
+    })
+
+}
