@@ -12,3 +12,25 @@ Responds 200 with object 'endpoints' of objects representing available endpoints
     'example response'  - what an example response looks like. 
 
     
+
+
+GET /api/articles
+
+    get array of article objects, each has keys:
+        author
+        title
+        article_id
+        topic
+        created_at
+        votes
+        article_img_url
+        comment_count, which is the total count of all the comments with this article_id. You should make use of queries to the database in order to achieve this.
+
+
+
+In addition:
+
+    the articles should be sorted by date in descending order.
+    there should not be a body property present on any of the article objects.
+Consider what errors could occur with this endpoint, and make sure to test for them.
+Remember to add a description of this endpoint to your /api endpoint. 
