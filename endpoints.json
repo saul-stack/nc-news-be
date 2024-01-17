@@ -80,5 +80,21 @@
         "S": "2020-10-04T01:03:00.000Z"
       }
     ]
+  },
+  "POST /api/articles/:article_id/comments": {
+    "description": "posts a user comment to the endpoint",
+    "queries": [],
+    "method": "POST",
+    "format" : "JSON object: { userName: '' , body: ''}" ,
+    "exampleResponse": [
+      {
+        "comment_id": 401,
+        "body": "this is my review of the article you have written",
+        "article_id": 1,
+        "author": "happyamy2016",
+        "votes": 0,
+        "created_at": "2024-01-17T19:16:41.018Z"
+      }
+    ]
   }
 }
