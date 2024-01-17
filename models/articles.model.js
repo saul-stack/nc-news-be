@@ -39,10 +39,9 @@ exports.requestArticleById = (requestedArticleId) => {
     })
 
     .catch((err) => {
-        console.log(err)
+        next(err)
     })
 }
-
 exports.requestAllArticles = () => {
 
     return database.query(`
@@ -80,7 +79,6 @@ exports.requestAllArticles = () => {
     })
 
 }
-
 exports.requestCommentsByArticleId = (requestedArticleId) => {
     return database.query(`
     SELECT * FROM comments WHERE article_id = ${requestedArticleId}
@@ -94,5 +92,24 @@ exports.requestCommentsByArticleId = (requestedArticleId) => {
     .catch((err) => {
         next(err)
     })
+}
+exports.insertComment = (userName, commentBody, articleId) => {
+
+    return database.query(`
+    INSERT INTO comments (author, body, article_id)
+    VAlUES ($1, $2, $3)
+    RETURNING *;`,
+    [userName, commentBody, articleId]
+    )
+    .then((result) => {
+        return result.rows
+    })
+
+    .catch((err) => {
+        next(err)
+    })
+
+
+
 }
 
