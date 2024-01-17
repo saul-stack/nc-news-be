@@ -10,6 +10,9 @@ exports.requestAllEndpoints = () => {
         return parsedData
     })
     
-    .catch((err) => console.log(err))
+    .catch((err)=> {
+
+        next(err)
+    })
     
 }
