@@ -1,4 +1,4 @@
-const { requestArticleByArticleId, requestAllArticles, requestCommentsByArticleId, insertComment, updateVotes} = require("../models/articles.model")
+const { requestArticleByArticleId, requestAllArticles, requestCommentsByArticleId, insertComment, updateVotes, requestArticlesByTopic} = require("../models/articles.model")
 
 exports.getArticleByArticleId = (request, response, next) => {
     const requestedArticleId = request.params.article_id
@@ -18,13 +18,28 @@ exports.getArticleByArticleId = (request, response, next) => {
         next(err)
     })
 }
-exports.getAllArticles = (request, response) => {
+exports.getArticles = (request, response) => {
 
-    requestAllArticles()
-    .then((articles) => {
-        return response.status(200).send(articles)
-    })
-    
+
+    const requestedTopic = request.query.topic
+
+    if (requestedTopic) {
+
+        requestArticlesByTopic(requestedTopic)
+        .then((articles) => {
+            
+            if (articles[0] === undefined) return response.status(404).send()
+
+            return response.status(200).send(articles)
+        })
+    }
+
+    else {
+        requestAllArticles()
+        .then((articles) => {
+            return response.status(200).send(articles)
+        })
+    }
 }
 exports.getCommentsByArticleId = (request, response, next) => {
 

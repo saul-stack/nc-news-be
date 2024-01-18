@@ -1,16 +1,17 @@
 const express = require("express")
 const server = express()
 
-const { getAllTopics, getAllEndpoints, getArticleByArticleId, getAllArticles, getCommentsByArticleId, postCommentByArticleId, patchArticleByArticleId, deleteCommentByCommentId, getAllComments, getCommentByCommentId } = require("./index.js")
+const { getAllTopics, getAllEndpoints, getArticleByArticleId, getArticles, getCommentsByArticleId, postCommentByArticleId, patchArticleByArticleId, deleteCommentByCommentId, getAllComments, getCommentByCommentId, getAllUsers} = require("./index.js")
 
 server.use(express.json())
 
 server.get('/api', getAllEndpoints)
 server.get('/api/topics', getAllTopics)
-server.get('/api/articles', getAllArticles)
+server.get('/api/articles', getArticles)
 
 server.get('/api/comments', getAllComments)
 server.get('/api/comments/:comment_id', getCommentByCommentId)
+server.get('/api/users', getAllUsers)
 
 
 server.get('/api/articles/:article_id/comments', getCommentsByArticleId)

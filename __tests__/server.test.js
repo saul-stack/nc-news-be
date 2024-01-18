@@ -66,7 +66,9 @@ describe('/api/topics', () => {
 })
 
 describe('/api/articles', () => {
+
     describe('GET /api/articles', () => {
+
         test('Responds (200) with an array of objects', () => {
             return request(server)
             .get('/api/articles')
@@ -78,7 +80,6 @@ describe('/api/articles', () => {
                 })
             })
         })
-
         test('each object in the array has correct keys', () => {
             return request(server)
             .get('/api/articles')
@@ -100,6 +101,37 @@ describe('/api/articles', () => {
                     expect(article.hasOwnProperty("body")).toBe(false)
                 })
             })
+        })
+    })
+
+    describe('GET /api/articles (query)', () => {
+
+        test('Responds (200) with an array of objects with expected properties', () => {
+            return request(server)
+            .get('/api/articles?topic=coding')
+            .expect(200)
+            .then((articles) => {
+                expect(Array.isArray(articles.body)).toBe(true)
+                articles.body.forEach((article) => {
+                    expect(typeof article).toBe("object")
+                    expect(article.hasOwnProperty("article_id")).toBe(true)
+                    expect(article.hasOwnProperty("title")).toBe(true)
+                    expect(article.hasOwnProperty("author")).toBe(true)
+                    expect(article.hasOwnProperty("created_at")).toBe(true)
+                    expect(article.hasOwnProperty("votes")).toBe(true)
+                    expect(article.hasOwnProperty("article_img_url")).toBe(true)
+                    expect(article.hasOwnProperty("comment_count")).toBe(true)
+
+                    expect(article.topic).toBe("coding")
+                })
+            })
+        })
+
+        test('Responds (404) when no articles exist with requested topic', () => {
+
+            return request(server)
+            .get('/api/articles?topic=fakeTopic')
+            .expect(404)
         })
     })
 })
@@ -373,7 +405,6 @@ describe('/api/comments', () => {
             .expect(200)
             .then((comments) => {
                 expect(Array.isArray(comments.body)).toBeTrue
-                //test
             })
         })
     })
@@ -406,5 +437,25 @@ describe('/api/comments/:comment_id', () => {
             .expect(400)
         })
 
+    })
+})
+
+describe('/api/users', () => {
+
+    describe('GET /api/users', () => {
+        test('Responds (200) with array of objects with expected properties', () => {
+
+            return request(server)
+            .get('/api/users')
+            .expect(200)
+            .then(({body}) => {
+                expect(Array.isArray(body)).toBe(true)
+                body.forEach((user) => {
+                    expect(user.hasOwnProperty("username")).toBe(true)
+                    expect(user.hasOwnProperty("name")).toBe(true)
+                    expect(user.hasOwnProperty("avatar_url")).toBe(true)
+                })
+            })
+        })
     })
 })
