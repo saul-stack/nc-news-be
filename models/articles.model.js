@@ -81,6 +81,43 @@ exports.requestAllArticles = () => {
     })
 
 }
+
+exports.requestArticlesByTopic = (requestedTopic) => {
+
+    return database.query(`
+
+    SELECT
+    articles.article_id,
+    articles.title,
+    articles.topic,
+    articles.author,
+    articles.created_at,
+    articles.votes,
+    article_img_url,
+    COUNT(comments.comment_id) AS comment_count
+
+    FROM
+    articles
+    
+    LEFT JOIN
+    comments ON comments.article_id = articles.article_id
+
+    WHERE topic = $1
+    
+    GROUP BY
+    articles.article_id
+    
+    ORDER BY
+    articles.created_at DESC
+    ;`, [requestedTopic])
+
+    .then((result) => {
+        articlesObject = result.rows
+        return (articlesObject)
+    })
+
+}
+
 exports.requestCommentsByArticleId = (requestedArticleId) => {
     return database.query(`
     SELECT * FROM comments WHERE article_id = ${requestedArticleId}
