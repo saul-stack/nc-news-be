@@ -97,7 +97,6 @@
       }
     ]
   },
-
   "PATCH /api/articles/:article_id": {
     "description": "updates the vote count for the article",
     "queries": [],
@@ -113,7 +112,13 @@
       "votes": 6,
       "article_img_url": "https://images.pexels.com/photos/11035471/pexels-photo-11035471.jpeg?w=700&h=700",
       "comment_count": "10"
-    }
-      
+    }  
+  },
+  "DELETE /api/comments/:comment_id" : {
+    "description": "deletes comment by comment_id",
+    "queries": [],
+    "method": "DELETE",
+    "format" : "number",
+    "exampleResponse": {}
   }
 }

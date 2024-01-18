@@ -8,9 +8,6 @@ module.exports.requestAllTopics = () => {
         return result.rows
     })
 
-    .catch((err) => {
-        console.log(err)
-    })
 }
 
 

@@ -4,7 +4,9 @@ const database = require("../db/connection.js")
 const fs = require("fs/promises")
 const { requestArticles } = require('../models/articles.model.js')
 
-afterAll(() => database.end())
+afterAll(() => {
+    database.end()
+})
 
 describe('/api', () => {
 
@@ -323,4 +325,86 @@ describe('/api/articles/:article_id/comments', () => {
     })
 })
 
+describe('api/comments/:comment_id', () => {
 
+    describe('DELETE /api/comments/:comment_id', () => {
+
+        test('responds (204) with no content', () => {
+
+            return request(server)
+            .delete('/api/comments/30')
+            .expect(204)
+            .then((response) => {
+                expect(response.body[0] === undefined).toBe(true)
+            })
+            .then(() => {
+                
+                return request(server)
+                .get("/api/comments/30")
+                .expect(404)
+            })           
+        })
+
+        test("responds (404) when comment doesn't exist", () => {
+
+            return request(server)
+            .delete('/api/comments/9999')
+            .expect(404)
+        })
+
+        test("responds (400) when comment_id is wrong format", () => {
+
+            return request(server)
+            .delete('/api/comments/comment23')
+            .expect(400)
+        })
+ 
+    })
+
+})
+
+describe('/api/comments', () => {
+    
+    describe('GET /api/comments', () => {
+
+        test('Responds (200) with an array of all commments', () => {
+            return request(server)
+            .get("/api/comments")
+            .expect(200)
+            .then((comments) => {
+                expect(Array.isArray(comments.body)).toBeTrue
+                //test
+            })
+        })
+    })
+})
+
+describe('/api/comments/:comment_id', () => {
+    
+    describe('GET /api/comments/:comment_id', () => {
+
+        test('GET commment by comment_id', () => {
+
+            return request(server)
+            .get("/api/comments/1")
+            .expect(200)
+            .then((comment) => {
+            })
+        })
+
+        test('responds (404) when comment not present in database', () => {
+
+            return request(server)
+            .get("/api/comments/99999")
+            .expect(404)
+        })
+
+        test('responds (400) when comment_id not a number', () => {
+
+            return request(server)
+            .get("/api/comments/commentNumber200")
+            .expect(400)
+        })
+
+    })
+})
