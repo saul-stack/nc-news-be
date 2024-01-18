@@ -1,6 +1,6 @@
 const database = require("../db/connection")
 
-module.exports.requestAllTopics = () => {
+exports.requestAllTopics = () => {
 
     return database.query(`SELECT * from topics;`)
 

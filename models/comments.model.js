@@ -1,6 +1,6 @@
 const database = require("../db/connection")
 
-module.exports.deleteComment = (requestedCommentId) => {
+exports.deleteComment = (requestedCommentId) => {
 
     return database.query(`
     DELETE FROM comments
@@ -13,7 +13,7 @@ module.exports.deleteComment = (requestedCommentId) => {
 
 }
 
-module.exports.requestAllComments = () => {
+exports.requestAllComments = () => {
 
 return database.query(`
 SELECT * FROM comments;
@@ -26,7 +26,7 @@ SELECT * FROM comments;
 
 }
 
-module.exports.requestCommentByCommentId = (requestedCommentId) => {
+exports.requestCommentByCommentId = (requestedCommentId) => {
 
     return database.query(`
     SELECT * FROM comments
