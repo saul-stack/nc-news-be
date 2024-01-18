@@ -1,6 +1,8 @@
+// const { getArticleByArticleId } = require("../controllers/articles.controller")
 const database = require("../db/connection")
 
-exports.requestArticleById = (requestedArticleId) => {
+exports.requestArticleByArticleId = (requestedArticleId) => {
+
     return database.query(`
 
     SELECT
@@ -112,4 +114,46 @@ exports.insertComment = (userName, commentBody, articleId) => {
 
 
 }
+exports.updateVotes = (articleId, newTotalVotes) => {
 
+    return database.query(`
+    UPDATE articles
+    SET votes = (${newTotalVotes})
+    WHERE article_id = ${articleId}
+    `)
+
+    .then(() => {
+    return database.query(`
+    SELECT
+    articles.article_id,
+    articles.body,
+    articles.title,
+    articles.topic,
+    articles.author,
+    articles.created_at,
+    articles.votes,
+    article_img_url,
+
+    COUNT(comments.comment_id) AS comment_count
+
+    FROM
+    articles
+
+    LEFT JOIN
+    comments ON comments.article_id = articles.article_id
+
+    WHERE articles.article_id = ${articleId}
+
+    GROUP BY
+    articles.article_id
+
+    `)
+    
+    })
+   
+    .then((result) => {
+        return result.rows[0]  
+    })
+
+
+}
