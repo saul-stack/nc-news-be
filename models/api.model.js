@@ -9,9 +9,8 @@ exports.requestAllEndpoints = () => {
         const parsedData = (JSON.parse(fileData))
         return parsedData
     })
-    
-    .catch((err)=> {
 
+    .catch((err)=> {
         next(err)
     })
     

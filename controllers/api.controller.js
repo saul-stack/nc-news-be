@@ -4,7 +4,7 @@ exports.getAllEndpoints = (request, response) => {
         
     requestAllEndpoints()
     .then((allEndpoints) => {
-    response.status(200).send(allEndpoints)
+    response.status(200).send({endpoints: allEndpoints})
     })
 
 }

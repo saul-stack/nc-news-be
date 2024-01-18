@@ -13,33 +13,37 @@ describe('/api', () => {
     describe('GET /api', () => {
 
         test('Responds (200) with object, with keys of valid endpoint names', () => {
+
+            let expectedProperties = {}
+            fs.readFile('endpoints.json', 'utf-8')
+            .then((fileContents) => {
+                expectedProperties = JSON.parse(fileContents)
+            })
             return request(server)
             .get('/api')
             .expect(200)
-            .then((response) => {
+            .then(({body}) => {
+                const {endpoints} = body
 
-                expect (typeof response.body).toBe("object")
-                expect(response.body.hasOwnProperty('GET /api')).toBe(true)
-                expect(response.body.hasOwnProperty('GET /api/topics')).toBe(true)
-                expect(response.body.hasOwnProperty('GET /api/articles')).toBe(true)
-
+                expect(typeof endpoints).toBe("object")
+                for (let property in expectedProperties) expect(endpoints.hasOwnProperty(property)).toBe(true)
             })
-        })
+       
+            test('each endpoint object has correct property names', () => {
+                return request(server)
+                .get('/api')
+                .then(({body}) => {
+                    const {endpoints} = body
 
-        test('each endpoint object has correct property names', () => {
-            return request(server)
-            .get('/api')
+                    expect(Object.keys(endpoints).length > 0).toBe(true)
 
-            .then((response) => {
-                
-                //if array.length > 0, for each element in there, check it has correct property names
-                (Object.keys(response.body)).forEach((key) => {
-                    expect((response.body[key]).hasOwnProperty('description')).toBe(true)
-                    expect((response.body[key]).hasOwnProperty('queries')).toBe(true)
-                    expect((response.body[key]).hasOwnProperty('exampleResponse')).toBe(true)
-                    expect((response.body[key]).hasOwnProperty('format')).toBe(true)
-
-                })     
+                    for(let endpoint in endpoints) {
+                        expect((endpoints[endpoint]).hasOwnProperty('description')).toBe(true)
+                        expect((endpoints[endpoint]).hasOwnProperty('queries')).toBe(true)
+                        expect((endpoints[endpoint]).hasOwnProperty('exampleResponse')).toBe(true)
+                        expect((endpoints[endpoint]).hasOwnProperty('format')).toBe(true)
+                    }
+                })
             })
         })
     })
@@ -49,16 +53,17 @@ describe('/api/topics', () => {
 
     describe('GET /api/topics', () => {
 
-        test('Responds (200) with array of objects, with expected keys', () => {
+        test('Responds (200) with array of topic objects, with expected property names', () => {
             return request(server)
             .get('/api/topics')
             .expect(200)
-            .then((response) => {
+            .then(({body}) => {
 
-                expect(Array.isArray(response.body)).toBe(true)
-                for (let entry of response.body) {
-                    expect(entry.hasOwnProperty('slug')).toBe(true)
-                    expect(entry.hasOwnProperty('description')).toBe(true)
+                expect(Array.isArray(body)).toBe(true)
+                expect(Object.keys(body).length > 0).toBe(true)
+                for(let topic in body){
+                    expect(body[topic].hasOwnProperty('slug')).toBe(true)
+                    expect(body[topic].hasOwnProperty('description')).toBe(true)
                 }
             })
         })
