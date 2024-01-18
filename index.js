@@ -1,5 +1,6 @@
-const { getTopics } = require('./controllers/topics.controller.js')
+const { getAllTopics } = require('./controllers/topics.controller.js')
 const { getAllEndpoints } = require('./controllers/api.controller.js')
-const { getAllArticles, getArticleById, getCommentsByArticleId, postComment} = require('./controllers/articles.controller.js')
+const { getAllArticles, getArticleByArticleId, getCommentsByArticleId, patchArticleByArticleId, postCommentByArticleId} = require('./controllers/articles.controller.js')
 
-module.exports =  {getTopics, getAllEndpoints, getArticleById, getAllArticles, getCommentsByArticleId, postComment}
+
+module.exports =  {getAllTopics, getAllEndpoints, getArticleByArticleId, getAllArticles, getCommentsByArticleId, postCommentByArticleId, patchArticleByArticleId}

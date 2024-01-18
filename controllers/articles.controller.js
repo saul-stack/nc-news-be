@@ -1,11 +1,11 @@
-const { requestArticleById, requestAllArticles, requestCommentsByArticleId, insertComment } = require("../models/articles.model")
+const { requestArticleByArticleId, requestAllArticles, requestCommentsByArticleId, insertComment, updateVotes} = require("../models/articles.model")
 
-exports.getArticleById = (request, response, next) => {
+exports.getArticleByArticleId = (request, response, next) => {
     const requestedArticleId = request.params.article_id
 
     if (isNaN(requestedArticleId)) return next({"code": "400"})
     
-    requestArticleById(requestedArticleId)
+    requestArticleByArticleId(requestedArticleId)
     .then((requestedArticle) => {
 
         // if (!requestedArticle) return Promise.reject ({code: "404"})
@@ -43,7 +43,7 @@ exports.getCommentsByArticleId = (request, response, next) => {
     })
 
 }
-exports.postComment = (request, response, next) => {
+exports.postCommentByArticleId = (request, response, next) => {
 
 
 
@@ -51,11 +51,10 @@ exports.postComment = (request, response, next) => {
     const articleId = request.params.article_id
 
 
-    requestArticleById(articleId)
+    requestArticleByArticleId(articleId)
     .then((requestedArticle) => {
 
         if (requestedArticle === undefined) {
-            console.log("bing")
             return next({code: "404"})
         }
 
@@ -77,5 +76,39 @@ exports.postComment = (request, response, next) => {
     .catch((error) => {
         next(error)
     })
+
+}
+exports.patchArticleByArticleId = (request, response, next) => {
+
+    
+    const requestedArticleId = request.params.article_id
+    
+    
+    if (isNaN(Number(requestedArticleId))) return next(({ code: "404" }))
+
+    if (request.body.inc_votes === undefined    || 
+        request.body.inc_votes > 999            || 
+        request.body.inc_votes < -999) return next({code: "400"})
+
+    requestArticleByArticleId(requestedArticleId)
+
+    .then((requestedArticle) => {
+
+        if (requestedArticle === undefined) return next({code: "404"})
+
+        let newTotalVotes = requestedArticle.votes + request.body.inc_votes
+
+        if (newTotalVotes < 1) { newTotalVotes = 0 } 
+    
+        return updateVotes(requestedArticleId, newTotalVotes)
+    })
+
+    .then((result) => {
+
+
+        return response.status(200).send(result)
+    })
+
+    
 
 }
