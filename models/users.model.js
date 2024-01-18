@@ -1,6 +1,6 @@
 const database = require("../db/connection")
 
-module.exports.requestAllUsers = () => {
+exports.requestAllUsers = () => {
 
     return database.query(`SELECT * from users;`)
 
