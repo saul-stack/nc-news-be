@@ -39,12 +39,9 @@ describe('/api', () => {
 
                 })     
             })
-            
-
         })
     })
 })
-
 
 describe('/api/topics', () => {
 
@@ -61,12 +58,9 @@ describe('/api/topics', () => {
                     expect(entry.hasOwnProperty('slug')).toBe(true)
                     expect(entry.hasOwnProperty('description')).toBe(true)
                 }
-        
             })
         })
-
     })
-    
 })
 
 describe('/api/articles', () => {
@@ -105,48 +99,228 @@ describe('/api/articles', () => {
                 })
             })
         })
+    })
+})
 
-        describe('/api/articles/:article_id', () => {
+describe('/api/articles/:article_id', () => {
 
-            describe('GET /api/articles/:article_id', () => {
+    describe('GET /api/articles/:article_id', () => {
 
-                test('responds (200) with an object with expected properties', () => {
+        test('responds (200) with an object with expected properties', () => {
 
-                    return request(server)
-                    .get('/api/articles/1')
-                    .expect(200)
-                    .then((response) => {
-                        expect(response.body.hasOwnProperty("author"))
-                        expect(response.body.hasOwnProperty("title"))
-                        expect(response.body.hasOwnProperty("article_id"))
-                        expect(response.body.hasOwnProperty("body"))
-                        expect(response.body.hasOwnProperty("topic"))
-                        expect(response.body.hasOwnProperty("created_at"))
-                        expect(response.body.hasOwnProperty("votes"))
-                        expect(response.body.hasOwnProperty("article_img_url"))
-                    })    
-                })
+            return request(server)
+            .get('/api/articles/1')
+            .expect(200)
+            .then((response) => {
+                expect(response.body.hasOwnProperty("author")).toBe(true)
+                expect(response.body.hasOwnProperty("title")).toBe(true)
+                expect(response.body.hasOwnProperty("article_id")).toBe(true)
+                expect(response.body.hasOwnProperty("body")).toBe(true)
+                expect(response.body.hasOwnProperty("topic")).toBe(true)
+                expect(response.body.hasOwnProperty("created_at")).toBe(true)
+                expect(response.body.hasOwnProperty("votes")).toBe(true)
+                expect(response.body.hasOwnProperty("article_img_url")).toBe(true)
+                expect(response.body.hasOwnProperty("comment_count")).toBe(true)
 
-                test('responds (404) "Not found" when article_id valid format but not present in database', () => {
-                    
-                    return request(server)
-                    .get('/api/articles/9999')
-                    .expect(404)
-                    .then((response) => {
-                        expect((response.body.msg)).toBe("Not found")
-                    })
-                })
+            })    
+        })
 
-                test('responds (400) "Bad request" when article_id not correct format', () => {
-                    
-                    return request(server)
-                    .get('/api/articles/article1')
-                    .expect(400)
-                    .then((response) => {
-                        expect((response.body.msg)).toBe("Bad request")
-                    })
-                })
+        test('responds (404) "Not found" when article_id valid format but not present in database', () => {
+            
+            return request(server)
+            .get('/api/articles/99999')
+            .expect(404)
+            .then((response) => {
+                expect((response.body.msg)).toBe("Not found")
+            })
+        })
+
+        test('responds (400) "Bad request" when article_id not correct format', () => {
+            
+            return request(server)
+            .get('/api/articles/article1')
+            .expect(400)
+            .then((response) => {
+                expect((response.body.msg)).toBe("Bad request")
             })
         })
     })
+
 })
+
+describe('/api/articles/:article_id/comments', () => {
+
+    describe('GET /api/articles/:article_id/comments', () => {
+        test('responds (200) with an array of objects with expected properties', () => {
+
+            return request(server)
+            .get('/api/articles/1/comments')
+            .expect(200)
+            .then((comments) => {
+    
+                expect (Array.isArray(comments.body)).toBe(true)
+    
+                comments.body.forEach((comment) => {
+                    expect(comment.hasOwnProperty("votes"))
+                    expect(comment.hasOwnProperty("comment_id"))
+                    expect(comment.hasOwnProperty("created_at"))
+                    expect(comment.hasOwnProperty("author"))
+                    expect(comment.hasOwnProperty("body"))
+                    expect(comment.hasOwnProperty("created_at"))
+                    expect(comment.hasOwnProperty("article_id"))
+                })
+            })    
+        })
+    
+        test('responds (404) "Not found" when article_id valid format but not present in database', () => {
+                
+            return request(server)
+            .get('/api/articles/9999/comments')
+            .expect(404)
+            .then((response) => {
+                expect((response.body.msg)).toBe("Not found")
+            })
+        })
+    
+        test('responds (400) "Bad request" when article_id not correct format', () => {
+            
+            return request(server)
+            .get('/api/articles/articleNumber1/comments')
+            .expect(400)
+            .then((response) => {
+                expect((response.body.msg)).toBe("Bad request")
+            })
+        })
+    })
+
+    describe('POST /api/articles/:article_id/comments', () => {
+
+
+        test('responds (201) with object with expected property values', () => {
+    
+            const commentToSend = { userName: "happyamy2016", body: "this is my review of the article you have written" }
+
+            return request(server)
+            .post('/api/articles/1/comments')
+            .send(commentToSend)
+            .expect(201)
+            .then((response) => {
+                expect(response.body[0].body).toBe("this is my review of the article you have written")
+                expect(response.body[0].author).toBe("happyamy2016")
+            })    
+        })
+
+        test('responds (400) "Bad request" when given invalid object', () => {
+
+            return request(server)
+            .post('/api/articles/1/comments')
+            .send({ userName: 21, body: "test" })
+            .expect(400)
+
+            .then(() => {
+                return request(server)
+                .post('/api/articles/1/comments')
+                .send({ userName: "test", body: 21 })
+                .expect(400)
+            })
+
+            .then(() => {
+                return request(server)
+                .post('/api/articles/1/comments')
+                .send({ userName: "test", body: 21 })
+                .expect(400)
+            })
+        })
+
+        test('reponds (404) "Not found" when given invalid path', () => {
+        
+            return request(server)
+            .post('/api/articles/99999')
+            .send({ userName: "happyamy2016", body: "test" })
+            .expect(404)
+        })
+    })
+
+    describe('PATCH /api/articles/:article_id', () => {
+
+
+        test('responds (200) with object with correct keys', () => {
+            return request(server)
+            .patch('/api/articles/3')
+            .send({"inc_votes": 6})
+            .then((response) => {
+
+                expect(typeof response.body).toBe("object")
+                expect(response.body.hasOwnProperty("author")).toBe(true)
+                expect(response.body.hasOwnProperty("title")).toBe(true)
+                expect(response.body.hasOwnProperty("article_id")).toBe(true)
+                expect(response.body.hasOwnProperty("body")).toBe(true)
+                expect(response.body.hasOwnProperty("topic")).toBe(true)
+                expect(response.body.hasOwnProperty("created_at")).toBe(true)
+                expect(response.body.hasOwnProperty("votes")).toBe(true)
+                expect(response.body.hasOwnProperty("article_img_url")).toBe(true)
+                expect(response.body.hasOwnProperty("comment_count")).toBe(true)
+            // .expect(???)// object.votes property should not be equal to previous 
+            })
+
+            .then(() => {
+            return request(server)
+            .patch('/api/articles/3')
+            .send({"inc_votes": -4})
+            .expect(200)
+            })
+        })
+
+        test('votes property of article object can not be set less than 0', () => {
+
+            return request(server)
+            .patch('/api/articles/3')
+            .send({"inc_votes": -3})
+            .then((response) => {
+                expect(response.body.votes >= 0).toBe(true)
+            })
+        })
+
+        test('responds (404) "Not found" when article_id invalid or not present in database', () => {
+            return request(server)
+            .patch('/api/articles/article23')
+            .send({"inc_votes": 1})
+            .expect(404)
+
+            .then(() => {
+            return request(server)
+            .patch('/api/articles/99999')
+            .send({"inc_votes": 1})
+            .expect(404)
+            })
+        })
+
+        test('responds (400) "Bad request" when patching data not valid format', () => {
+            
+            return request(server)
+            .patch('/api/articles/1')
+            .send("inc_votes: 1")
+            .expect(400)
+        })
+
+        test('responds (400) "Bad request" when patching data is not within acceptable bounds', () => {
+
+            return request(server)
+            .patch('/api/articles/1')
+            .send({"inc_votes": -9999})
+            .expect(400)
+
+            .then(() => {
+            return request(server)
+            .patch('/api/articles/1')
+            .send({"inc_votes": 9999})
+            .expect(400)
+            })
+
+
+        }) 
+        
+    })
+})
+
+

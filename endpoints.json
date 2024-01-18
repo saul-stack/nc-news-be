@@ -45,7 +45,7 @@
     "description": "serves up a json representation of the requested article",
     "queries": [],
     "method": "GET",
-    "format": "typeof article_id === number",
+    "format": "",
     "exampleResponse": {
       "article_id": 1,
       "title": "Running a Node App",
@@ -56,5 +56,64 @@
       "votes": 0,
       "article_img_url": "https://images.pexels.com/photos/11035380/pexels-photo-11035380.jpeg?w=700&h=700"
     }
+  },
+  "GET /api/articles/:article_id/comments": {
+    "description": "serves an array of all comments on requested article",
+    "queries": [],
+    "method": "GET",
+    "format" : "",
+    "exampleResponse": [
+      {
+        "comment_id": 89,
+        "body": "Esse et expedita harum non. Voluptatibus commodi voluptatem. Minima velit suscipit numquam ea. Id vitae debitis aut incidunt odio quo quam possimus ipsum.",
+        "article_id": 1,
+        "author": "cooljmessy",
+        "votes": 2,
+        "created_at": "2020-10-24T06:08:00.000Z"
+      },
+      {
+        "comment_id": 86,
+        "body": "Et explicabo dignissimos officia dolore rerum aliquam corrupti. Culpa corporis earum et earum officia a est atque at. Quidem quo recusandae delectus autem possimus blanditiis optio. Sed culpa culpa. Exercitationem nemo aspernatur alias ut qui.",
+        "article_id": 1,
+        "author": "tickle122",
+        "votes": 14,
+        "S": "2020-10-04T01:03:00.000Z"
+      }
+    ]
+  },
+  "POST /api/articles/:article_id/comments": {
+    "description": "posts a user comment to the endpoint",
+    "queries": [],
+    "method": "POST",
+    "format" : "JSON object: { userName: '' , body: ''}" ,
+    "exampleResponse": [
+      {
+        "comment_id": 401,
+        "body": "this is my review of the article you have written",
+        "article_id": 1,
+        "author": "happyamy2016",
+        "votes": 0,
+        "created_at": "2024-01-17T19:16:41.018Z"
+      }
+    ]
+  },
+
+  "PATCH /api/articles/:article_id": {
+    "description": "updates the vote count for the article",
+    "queries": [],
+    "method": "PATCH",
+    "format" : "JSON object: { 'inc_votes': 1 }" ,
+    "exampleResponse": {
+      "article_id": 3,
+      "body": "This is a collection of open source apps built with React.JS library. In this observation, we compared nearly 800 projects to pick the top 22. (React Native: 11, React: 11). To evaluate the quality, Mybridge AI considered a variety of factors to determine how useful the projects are for programmers. To give you an idea on the quality, the average number of Github stars from the 22 projects was 1,681.",
+      "title": "22 Amazing open source React projects",
+      "topic": "coding",
+      "author": "happyamy2016",
+      "created_at": "2020-02-29T11:12:00.000Z",
+      "votes": 6,
+      "article_img_url": "https://images.pexels.com/photos/11035471/pexels-photo-11035471.jpeg?w=700&h=700",
+      "comment_count": "10"
+    }
+      
   }
 }

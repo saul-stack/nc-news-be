@@ -1,30 +1,114 @@
-const { requestArticleById, requestArticles, requestComments } = require("../models/articles.model")
+const { requestArticleByArticleId, requestAllArticles, requestCommentsByArticleId, insertComment, updateVotes} = require("../models/articles.model")
 
-exports.getArticleById = (request, response) => {
+exports.getArticleByArticleId = (request, response, next) => {
     const requestedArticleId = request.params.article_id
 
-    if (isNaN(requestedArticleId)) return response.status(400).send({msg: "Bad request"})
+    if (isNaN(requestedArticleId)) return next({"code": "400"})
     
-    requestArticleById(requestedArticleId)
+    requestArticleByArticleId(requestedArticleId)
     .then((requestedArticle) => {
 
-        if (requestedArticle === undefined) return response.status(404).send({msg: "Not found"})
+        // if (!requestedArticle) return Promise.reject ({code: "404"})
+        if (requestedArticle === undefined) return Promise.reject ({code: "404"})
+
        return response.status(200).send(requestedArticle)
 
     })
+    .catch((err) => {
+        next(err)
+    })
 }
+exports.getAllArticles = (request, response) => {
 
-exports.getArticles = (request, response) => {
-
-    requestArticles()
+    requestAllArticles()
     .then((articles) => {
         return response.status(200).send(articles)
     })
     
 }
+exports.getCommentsByArticleId = (request, response, next) => {
 
-//for each article object, get its article_id
+    const requestedArticleId = request.params.article_id
 
-//commentCount = (query comments table for all results where article_id matches).length
+    if (isNaN(requestedArticleId)) return next({"code": "400"})
 
-//article.comment_count = commentCount
+    requestCommentsByArticleId(requestedArticleId)
+    .then((comments) => {
+
+        if (comments[0] === undefined) return Promise.reject ({code: "404"})
+        return response.status(200).send(comments)
+    })
+    .catch((err)=> {
+        next(err)
+    })
+
+}
+exports.postCommentByArticleId = (request, response, next) => {
+
+
+
+    const commentToPost = request.body
+    const articleId = request.params.article_id
+
+
+    requestArticleByArticleId(articleId)
+    .then((requestedArticle) => {
+
+        if (requestedArticle === undefined) {
+            return next({code: "404"})
+        }
+
+    })
+    
+    const {userName, body} = commentToPost
+
+    if( userName.length < 1     ||  body.length < 1                 ||
+        typeof body != "string" ||  typeof userName != "string"){
+
+    return next({"code": "400"}) }
+
+    insertComment(userName, body, articleId)
+    .then((comment) => { 
+        return response.status(201).send(comment)} 
+    )
+
+    //which errors
+    .catch((error) => {
+        next(error)
+    })
+
+}
+exports.patchArticleByArticleId = (request, response, next) => {
+
+    
+    const requestedArticleId = request.params.article_id
+    
+    
+    if (isNaN(Number(requestedArticleId))) return next(({ code: "404" }))
+
+    if (request.body.inc_votes === undefined    || 
+        request.body.inc_votes > 999            || 
+        request.body.inc_votes < -999) return next({code: "400"})
+
+    requestArticleByArticleId(requestedArticleId)
+
+    .then((requestedArticle) => {
+
+        if (requestedArticle === undefined) return next({code: "404"})
+
+        let newTotalVotes = requestedArticle.votes + request.body.inc_votes
+
+        if (newTotalVotes < 1) { newTotalVotes = 0 } 
+    
+        return updateVotes(requestedArticleId, newTotalVotes)
+    })
+
+    .then((result) => {
+
+
+        return response.status(200).send(result)
+    })
+
+    
+
+}
