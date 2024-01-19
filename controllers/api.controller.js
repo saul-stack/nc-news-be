@@ -7,5 +7,7 @@ exports.getAllEndpoints = (request, response) => {
     response.status(200).send({endpoints: allEndpoints})
     })
 
+    //what if there are no endpoints
+
 }
 

@@ -315,50 +315,48 @@ describe('/api/articles/:article_id/comments', () => {
             .patch('/api/articles/3')
             .send({"inc_votes": 6})
             .then(({body}) => {
+                const {article} = body
 
-                expect(typeof body).toBe("object")
-                expect(body.hasOwnProperty("author")).toBe(true)
-                expect(body.hasOwnProperty("title")).toBe(true)
-                expect(body.hasOwnProperty("article_id")).toBe(true)
-                expect(body.hasOwnProperty("body")).toBe(true)
-                expect(body.hasOwnProperty("topic")).toBe(true)
-                expect(body.hasOwnProperty("created_at")).toBe(true)
-                expect(body.hasOwnProperty("votes")).toBe(true)
-                expect(body.hasOwnProperty("article_img_url")).toBe(true)
-                expect(body.hasOwnProperty("comment_count")).toBe(true)
-            // .expect(???)// object.votes property should not be equal to previous 
+                expect(typeof article).toBe("object")
+                expect(article.hasOwnProperty("author")).toBe(true)
+                expect(article.hasOwnProperty("title")).toBe(true)
+                expect(article.hasOwnProperty("article_id")).toBe(true)
+                expect(article.hasOwnProperty("body")).toBe(true)
+                expect(article.hasOwnProperty("topic")).toBe(true)
+                expect(article.hasOwnProperty("created_at")).toBe(true)
+                expect(article.hasOwnProperty("votes")).toBe(true)
+                expect(article.hasOwnProperty("article_img_url")).toBe(true)
+                expect(article.hasOwnProperty("comment_count")).toBe(true)
+
+                expect(article.votes === 6).toBe(true)
+
             })
 
-            .then(() => {
-            return request(server)
-            .patch('/api/articles/3')
-            .send({"inc_votes": -4})
-            .expect(200)
-            })
         })
 
         test('votes property of article object can not be set less than 0', () => {
 
             return request(server)
             .patch('/api/articles/3')
-            .send({"inc_votes": -3})
+            .send({"inc_votes": -8})
             .then(({body}) => {
-                expect(body.votes >= 0).toBe(true)
+                const {article} = body
+                expect(article.votes >= 0).toBe(true)
             })
         })
 
         test('responds (404) "Not found" when article_id invalid or not present in database', () => {
             return request(server)
-            .patch('/api/articles/article23')
-            .send({"inc_votes": 1})
-            .expect(404)
-
-            .then(() => {
-            return request(server)
             .patch('/api/articles/99999')
             .send({"inc_votes": 1})
             .expect(404)
-            })
+        })
+
+        test('responds (404) "Invalid article_id" when article_id invalid', () => {
+            return request(server)
+            .patch('/api/articles/article23')
+            .send({"inc_votes": 1})
+            .expect(400)
         })
 
         test('responds (400) "Bad request" when patching data not valid format', () => {

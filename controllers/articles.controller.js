@@ -4,14 +4,12 @@ const { requestUserByUserName } = require('../models/users.model')
 exports.getArticleByArticleId = (request, response, next) => {
     const requestedArticleId = request.params.article_id
 
-    if (isNaN(requestedArticleId)) return next({"code": "400"})
+    if (isNaN(requestedArticleId)) throw ({"code": "400"})
     
     requestArticleByArticleId(requestedArticleId)
     .then((article) => {
 
-        // if (!article) return Promise.reject ({code: "404"})
-        if (article === undefined) return Promise.reject ({code: "404"})
-
+        if (article === undefined) throw ({code: "404"})
        return response.status(200).send({article})
 
     })
@@ -46,7 +44,7 @@ exports.getCommentsByArticleId = (request, response, next) => {
 
     const requestedArticleId = request.params.article_id
 
-    if (isNaN(requestedArticleId)) return next({"code": "400"})
+    if (isNaN(requestedArticleId)) throw({"code": "400"})
 
     requestCommentsByArticleId(requestedArticleId)
     .then((comments) => {
@@ -68,53 +66,58 @@ exports.postCommentByArticleId = (request, response, next) => {
     .then((requestedArticle) => {
 
         if (requestedArticle === undefined) {
-            return next({code: "404"})
+            throw ({code: "404"})
         }
     })
+    .catch((error) => {
+        next(error)
+    })
+
     
 
-    const {userName, body} = commentToPost
 
+    const {userName, body} = commentToPost
 
     if( userName.length < 1     ||  body.length < 1                 ||
         typeof body != "string" ||  typeof userName != "string"){
 
-    return next({"code": "400"}) }
-
+        return next({"code": "400"})
+        // throw ({"code": "400"})
+    }
 
     requestUserByUserName(userName)
     .then((user) => {
-        if (user === undefined) return next({code: "404"})
+        if (user === undefined) throw ({code: "404"})
     })
-
+    .catch((error) => {
+        next(error)
+    })
 
     insertComment(userName, body, articleId)
     .then((comment) => { 
         return response.status(201).send({comment})} 
     )
-
     .catch((error) => {
         next(error)
     })
 
 }
 exports.patchArticleByArticleId = (request, response, next) => {
-
     
     const requestedArticleId = request.params.article_id
     
     
-    if (isNaN(Number(requestedArticleId))) return next(({ code: "404" }))
+    if (isNaN(Number(requestedArticleId))) return next(({ code: "400" }))
 
     if (request.body.inc_votes === undefined    || 
-        request.body.inc_votes > 999            || 
-        request.body.inc_votes < -999) return next({code: "400"})
-
+    request.body.inc_votes > 999                || 
+    request.body.inc_votes < -999) return next({code: "400"})
+    
     requestArticleByArticleId(requestedArticleId)
 
     .then((requestedArticle) => {
 
-        if (requestedArticle === undefined) return next({code: "404"})
+        if (requestedArticle === undefined) throw ({code: "404"})
 
         let newTotalVotes = requestedArticle.votes + request.body.inc_votes
 
@@ -122,11 +125,11 @@ exports.patchArticleByArticleId = (request, response, next) => {
     
         return updateVotes(requestedArticleId, newTotalVotes)
     })
-
-    .then((result) => {
-
-
-        return response.status(200).send(result)
+    .then((article) => {
+        return response.status(200).send({article})
+    })
+    .catch((error) => {
+        next(error)
     })
 
     
