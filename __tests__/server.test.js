@@ -3,7 +3,6 @@ const request = require('supertest')
 const database = require("../db/connection.js")
 const fs = require("fs/promises")
 const { requestArticles } = require('../models/articles.model.js')
-const { deflate } = require('zlib')
 
 afterAll(() => {
     database.end()
