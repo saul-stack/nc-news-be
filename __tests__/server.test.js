@@ -2,7 +2,6 @@ const server = require('../server.js')
 const request = require('supertest')
 const database = require("../db/connection.js")
 const fs = require("fs/promises")
-const { requestArticles } = require('../models/articles.model.js')
 
 afterAll(() => {
     database.end()
@@ -380,10 +379,7 @@ describe('/api/articles/:article_id/comments', () => {
             .send({"inc_votes": 9999})
             .expect(400)
             })
-
-
         }) 
-        
     })
 })
 
@@ -420,9 +416,7 @@ describe('api/comments/:comment_id', () => {
             .delete('/api/comments/comment23')
             .expect(400)
         })
- 
     })
-
 })
 
 describe('/api/comments', () => {
@@ -466,7 +460,6 @@ describe('/api/comments/:comment_id', () => {
             .get("/api/comments/commentNumber200")
             .expect(400)
         })
-
     })
 })
 

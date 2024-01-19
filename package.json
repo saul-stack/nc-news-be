@@ -9,7 +9,8 @@
     "seed-test": "PGDATABASE=nc_news_test node ./db/seeds/run-seed.js",
     "test": "jest",
     "start": "node listen.js",
-    "seed-prod": "NODE_ENV=production npm run seed"
+    "seed-prod": "NODE_ENV=production npm run seed",
+    "seed-and-test" : "jest __tests__/server.test.js && PGDATABASE=nc_news_test node ./db/seeds/run-seed.js"
   },
   "repository": {
     "type": "git",
