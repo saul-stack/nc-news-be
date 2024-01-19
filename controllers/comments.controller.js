@@ -4,11 +4,10 @@ const database = require("../db/connection")
 exports.getAllComments = (request, response, next) => {
 
     requestAllComments()
-    .then((allComments) => {
-        response.status(200).send(allComments)
+    .then((comments) => {
+        response.status(200).send({comments})
     })
 }
-
 exports.deleteCommentByCommentId = (request, response, next) => {
 
     const requestedCommentId = request.params.comment_id
@@ -26,7 +25,6 @@ exports.deleteCommentByCommentId = (request, response, next) => {
     })
     
 }
-
 exports.getCommentByCommentId = (request, response, next) => {
 
     const requestedCommentId = request.params.comment_id

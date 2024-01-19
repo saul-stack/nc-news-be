@@ -3,6 +3,7 @@ const request = require('supertest')
 const database = require("../db/connection.js")
 const fs = require("fs/promises")
 const { requestArticles } = require('../models/articles.model.js')
+const { deflate } = require('zlib')
 
 afterAll(() => {
     database.end()
@@ -24,28 +25,28 @@ describe('/api', () => {
             .expect(200)
             .then(({body}) => {
                 const {endpoints} = body
-
                 expect(typeof endpoints).toBe("object")
                 for (let property in expectedProperties) expect(endpoints.hasOwnProperty(property)).toBe(true)
             })
-       
-            test('each endpoint object has correct property names', () => {
-                return request(server)
-                .get('/api')
-                .then(({body}) => {
-                    const {endpoints} = body
+        })
 
-                    expect(Object.keys(endpoints).length > 0).toBe(true)
+        test('each endpoint object has correct property names', () => {
+            return request(server)
+            .get('/api')
+            .then(({body}) => {
+                const {endpoints} = body
 
-                    for(let endpoint in endpoints) {
-                        expect((endpoints[endpoint]).hasOwnProperty('description')).toBe(true)
-                        expect((endpoints[endpoint]).hasOwnProperty('queries')).toBe(true)
-                        expect((endpoints[endpoint]).hasOwnProperty('exampleResponse')).toBe(true)
-                        expect((endpoints[endpoint]).hasOwnProperty('format')).toBe(true)
-                    }
-                })
+                expect(Object.keys(endpoints).length > 0).toBe(true)
+
+                for(let endpoint in endpoints) {
+                    expect((endpoints[endpoint]).hasOwnProperty('description')).toBe(true)
+                    expect((endpoints[endpoint]).hasOwnProperty('queries')).toBe(true)
+                    expect((endpoints[endpoint]).hasOwnProperty('exampleResponse')).toBe(true)
+                    expect((endpoints[endpoint]).hasOwnProperty('format')).toBe(true)
+                }
             })
         })
+        
     })
 })
 
@@ -78,21 +79,23 @@ describe('/api/articles', () => {
             return request(server)
             .get('/api/articles')
             .expect(200)
-            .then((articles) => {
-                expect(Array.isArray(articles.body)).toBe(true)
-                articles.body.forEach((article) => {
+            .then(({body}) => {
+                const {articles} = body
+
+                expect(Array.isArray(articles)).toBe(true)
+                articles.forEach((article) => {
                     expect(typeof article).toBe("object")
                 })
             })
         })
+
         test('each object in the array has correct keys', () => {
             return request(server)
             .get('/api/articles')
-            .then((articles) => {
-
-                expect(articles.body.length > 0).toBe(true)
-
-                articles.body.forEach((article) => {
+            .then(({body}) => {
+                const {articles} = body
+                expect(articles.length > 0).toBe(true)
+                articles.forEach((article) => {
 
                     expect(article.hasOwnProperty("author")).toBe(true)
                     expect(article.hasOwnProperty("title")).toBe(true)
@@ -115,9 +118,10 @@ describe('/api/articles', () => {
             return request(server)
             .get('/api/articles?topic=coding')
             .expect(200)
-            .then((articles) => {
-                expect(Array.isArray(articles.body)).toBe(true)
-                articles.body.forEach((article) => {
+            .then(({body}) => {
+                const {articles} = body
+                expect(Array.isArray(articles)).toBe(true)
+                articles.forEach((article) => {
                     expect(typeof article).toBe("object")
                     expect(article.hasOwnProperty("article_id")).toBe(true)
                     expect(article.hasOwnProperty("title")).toBe(true)
@@ -150,16 +154,17 @@ describe('/api/articles/:article_id', () => {
             return request(server)
             .get('/api/articles/1')
             .expect(200)
-            .then((response) => {
-                expect(response.body.hasOwnProperty("author")).toBe(true)
-                expect(response.body.hasOwnProperty("title")).toBe(true)
-                expect(response.body.hasOwnProperty("article_id")).toBe(true)
-                expect(response.body.hasOwnProperty("body")).toBe(true)
-                expect(response.body.hasOwnProperty("topic")).toBe(true)
-                expect(response.body.hasOwnProperty("created_at")).toBe(true)
-                expect(response.body.hasOwnProperty("votes")).toBe(true)
-                expect(response.body.hasOwnProperty("article_img_url")).toBe(true)
-                expect(response.body.hasOwnProperty("comment_count")).toBe(true)
+            .then(({body}) => {
+                const {article} = body
+
+                expect(article.hasOwnProperty("author")).toBe(true)
+                expect(article.hasOwnProperty("title")).toBe(true)
+                expect(article.hasOwnProperty("article_id")).toBe(true)
+                expect(article.hasOwnProperty("topic")).toBe(true)
+                expect(article.hasOwnProperty("created_at")).toBe(true)
+                expect(article.hasOwnProperty("votes")).toBe(true)
+                expect(article.hasOwnProperty("article_img_url")).toBe(true)
+                expect(article.hasOwnProperty("comment_count")).toBe(true)
 
             })    
         })
@@ -169,8 +174,8 @@ describe('/api/articles/:article_id', () => {
             return request(server)
             .get('/api/articles/99999')
             .expect(404)
-            .then((response) => {
-                expect((response.body.msg)).toBe("Not found")
+            .then(({body}) => {
+                expect((body.msg)).toBe("Not found")
             })
         })
 
@@ -179,8 +184,8 @@ describe('/api/articles/:article_id', () => {
             return request(server)
             .get('/api/articles/article1')
             .expect(400)
-            .then((response) => {
-                expect((response.body.msg)).toBe("Bad request")
+            .then(({body}) => {
+                expect((body.msg)).toBe("Bad request")
             })
         })
     })
@@ -190,16 +195,16 @@ describe('/api/articles/:article_id', () => {
 describe('/api/articles/:article_id/comments', () => {
 
     describe('GET /api/articles/:article_id/comments', () => {
-        test('responds (200) with an array of objects with expected properties', () => {
+        test('responds (200) with an array of objects with expected properties, ordered by date descending', () => {
 
             return request(server)
             .get('/api/articles/1/comments')
             .expect(200)
-            .then((comments) => {
+            .then(({body}) => {
     
-                expect (Array.isArray(comments.body)).toBe(true)
-    
-                comments.body.forEach((comment) => {
+                expect (Array.isArray(body)).toBe(true)
+
+                body.forEach((comment) => {
                     expect(comment.hasOwnProperty("votes"))
                     expect(comment.hasOwnProperty("comment_id"))
                     expect(comment.hasOwnProperty("created_at"))
@@ -208,6 +213,9 @@ describe('/api/articles/:article_id/comments', () => {
                     expect(comment.hasOwnProperty("created_at"))
                     expect(comment.hasOwnProperty("article_id"))
                 })
+
+                expect(body).toBeSortedBy('created_at', {descending: true})
+
             })    
         })
     
@@ -216,8 +224,8 @@ describe('/api/articles/:article_id/comments', () => {
             return request(server)
             .get('/api/articles/9999/comments')
             .expect(404)
-            .then((response) => {
-                expect((response.body.msg)).toBe("Not found")
+            .then(({body}) => {
+                expect(body.msg).toBe("Not found")
             })
         })
     
@@ -226,8 +234,8 @@ describe('/api/articles/:article_id/comments', () => {
             return request(server)
             .get('/api/articles/articleNumber1/comments')
             .expect(400)
-            .then((response) => {
-                expect((response.body.msg)).toBe("Bad request")
+            .then(({body}) => {
+                expect((body.msg)).toBe("Bad request")
             })
         })
     })
@@ -235,7 +243,7 @@ describe('/api/articles/:article_id/comments', () => {
     describe('POST /api/articles/:article_id/comments', () => {
 
 
-        test('responds (201) with object with expected property values', () => {
+        test('responds (201) "Comment posted" with comment object with expected property values', () => {
     
             const commentToSend = { userName: "happyamy2016", body: "this is my review of the article you have written" }
 
@@ -243,10 +251,33 @@ describe('/api/articles/:article_id/comments', () => {
             .post('/api/articles/1/comments')
             .send(commentToSend)
             .expect(201)
-            .then((response) => {
-                expect(response.body[0].body).toBe("this is my review of the article you have written")
-                expect(response.body[0].author).toBe("happyamy2016")
+            .then(({body}) => {
+                const {comment} = body
+
+                expect(comment.body).toBe("this is my review of the article you have written")
+                expect(comment.author).toBe("happyamy2016")
             })    
+        })
+
+        test('responds (201) "Comment posted", ignoring unnecessary properties', () => {
+            const commentToSend = { 
+                userName: "happyamy2016", 
+                body: "this is my review of the article you have written",
+                unnecessaryField: "this data should be ignored"
+            }
+
+            return request(server)
+            .post('/api/articles/1/comments')
+            .send(commentToSend)
+            .expect(201)
+            .then(({body}) => {
+                const {comment} = body
+
+                expect(comment.body).toBe("this is my review of the article you have written")
+                expect(comment.author).toBe("happyamy2016")
+                expect(Object.keys(comment).includes("unnecessaryField")).toBe(false)
+            })   
+
         })
 
         test('responds (400) "Bad request" when given invalid object', () => {
@@ -256,28 +287,25 @@ describe('/api/articles/:article_id/comments', () => {
             .send({ userName: 21, body: "test" })
             .expect(400)
 
-            .then(() => {
-                return request(server)
-                .post('/api/articles/1/comments')
-                .send({ userName: "test", body: 21 })
-                .expect(400)
-            })
-
-            .then(() => {
-                return request(server)
-                .post('/api/articles/1/comments')
-                .send({ userName: "test", body: 21 })
-                .expect(400)
-            })
         })
 
-        test('reponds (404) "Not found" when given invalid path', () => {
+        test('responds (404) "Username does not exist" when given object userName not present in database', () => {
+
+            return request(server)
+            .post('/api/articles/1/comments')
+            .send({ userName: "fake-user34", body: "21" })
+            .expect(404)
+           
+        })
+
+        test('reponds (404) "Article not found" when given invalid path', () => {
         
             return request(server)
-            .post('/api/articles/99999')
+            .post('/api/articles/99999/comments')
             .send({ userName: "happyamy2016", body: "test" })
             .expect(404)
         })
+
     })
 
     describe('PATCH /api/articles/:article_id', () => {
@@ -287,18 +315,18 @@ describe('/api/articles/:article_id/comments', () => {
             return request(server)
             .patch('/api/articles/3')
             .send({"inc_votes": 6})
-            .then((response) => {
+            .then(({body}) => {
 
-                expect(typeof response.body).toBe("object")
-                expect(response.body.hasOwnProperty("author")).toBe(true)
-                expect(response.body.hasOwnProperty("title")).toBe(true)
-                expect(response.body.hasOwnProperty("article_id")).toBe(true)
-                expect(response.body.hasOwnProperty("body")).toBe(true)
-                expect(response.body.hasOwnProperty("topic")).toBe(true)
-                expect(response.body.hasOwnProperty("created_at")).toBe(true)
-                expect(response.body.hasOwnProperty("votes")).toBe(true)
-                expect(response.body.hasOwnProperty("article_img_url")).toBe(true)
-                expect(response.body.hasOwnProperty("comment_count")).toBe(true)
+                expect(typeof body).toBe("object")
+                expect(body.hasOwnProperty("author")).toBe(true)
+                expect(body.hasOwnProperty("title")).toBe(true)
+                expect(body.hasOwnProperty("article_id")).toBe(true)
+                expect(body.hasOwnProperty("body")).toBe(true)
+                expect(body.hasOwnProperty("topic")).toBe(true)
+                expect(body.hasOwnProperty("created_at")).toBe(true)
+                expect(body.hasOwnProperty("votes")).toBe(true)
+                expect(body.hasOwnProperty("article_img_url")).toBe(true)
+                expect(body.hasOwnProperty("comment_count")).toBe(true)
             // .expect(???)// object.votes property should not be equal to previous 
             })
 
@@ -315,8 +343,8 @@ describe('/api/articles/:article_id/comments', () => {
             return request(server)
             .patch('/api/articles/3')
             .send({"inc_votes": -3})
-            .then((response) => {
-                expect(response.body.votes >= 0).toBe(true)
+            .then(({body}) => {
+                expect(body.votes >= 0).toBe(true)
             })
         })
 
@@ -371,11 +399,11 @@ describe('api/comments/:comment_id', () => {
             return request(server)
             .delete('/api/comments/30')
             .expect(204)
-            .then((response) => {
-                expect(response.body[0] === undefined).toBe(true)
+            .then(({body}) => {
+                expect(body[0] === undefined).toBe(true)
             })
+
             .then(() => {
-                
                 return request(server)
                 .get("/api/comments/30")
                 .expect(404)
@@ -408,8 +436,8 @@ describe('/api/comments', () => {
             return request(server)
             .get("/api/comments")
             .expect(200)
-            .then((comments) => {
-                expect(Array.isArray(comments.body)).toBeTrue
+            .then(({body}) => {
+                expect(Array.isArray(body.comments)).toBeTrue
             })
         })
     })
@@ -454,8 +482,9 @@ describe('/api/users', () => {
             .get('/api/users')
             .expect(200)
             .then(({body}) => {
-                expect(Array.isArray(body)).toBe(true)
-                body.forEach((user) => {
+                const {users} = body
+                expect(Array.isArray(users)).toBe(true)
+                users.forEach((user) => {
                     expect(user.hasOwnProperty("username")).toBe(true)
                     expect(user.hasOwnProperty("name")).toBe(true)
                     expect(user.hasOwnProperty("avatar_url")).toBe(true)

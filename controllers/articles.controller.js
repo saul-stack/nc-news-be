@@ -1,4 +1,5 @@
 const { requestArticleByArticleId, requestAllArticles, requestCommentsByArticleId, insertComment, updateVotes, requestArticlesByTopic} = require("../models/articles.model")
+const { requestUserByUserName } = require('../models/users.model')
 
 exports.getArticleByArticleId = (request, response, next) => {
     const requestedArticleId = request.params.article_id
@@ -6,12 +7,12 @@ exports.getArticleByArticleId = (request, response, next) => {
     if (isNaN(requestedArticleId)) return next({"code": "400"})
     
     requestArticleByArticleId(requestedArticleId)
-    .then((requestedArticle) => {
+    .then((article) => {
 
-        // if (!requestedArticle) return Promise.reject ({code: "404"})
-        if (requestedArticle === undefined) return Promise.reject ({code: "404"})
+        // if (!article) return Promise.reject ({code: "404"})
+        if (article === undefined) return Promise.reject ({code: "404"})
 
-       return response.status(200).send(requestedArticle)
+       return response.status(200).send({article})
 
     })
     .catch((err) => {
@@ -30,14 +31,14 @@ exports.getArticles = (request, response) => {
             
             if (articles[0] === undefined) return response.status(404).send()
 
-            return response.status(200).send(articles)
+            return response.status(200).send({articles})
         })
     }
 
     else {
         requestAllArticles()
         .then((articles) => {
-            return response.status(200).send(articles)
+            return response.status(200).send({articles})
         })
     }
 }
@@ -60,11 +61,8 @@ exports.getCommentsByArticleId = (request, response, next) => {
 }
 exports.postCommentByArticleId = (request, response, next) => {
 
-
-
     const commentToPost = request.body
     const articleId = request.params.article_id
-
 
     requestArticleByArticleId(articleId)
     .then((requestedArticle) => {
@@ -72,22 +70,29 @@ exports.postCommentByArticleId = (request, response, next) => {
         if (requestedArticle === undefined) {
             return next({code: "404"})
         }
-
     })
     
+
     const {userName, body} = commentToPost
+
 
     if( userName.length < 1     ||  body.length < 1                 ||
         typeof body != "string" ||  typeof userName != "string"){
 
     return next({"code": "400"}) }
 
+
+    requestUserByUserName(userName)
+    .then((user) => {
+        if (user === undefined) return next({code: "404"})
+    })
+
+
     insertComment(userName, body, articleId)
     .then((comment) => { 
-        return response.status(201).send(comment)} 
+        return response.status(201).send({comment})} 
     )
 
-    //which errors
     .catch((error) => {
         next(error)
     })

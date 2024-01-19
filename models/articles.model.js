@@ -1,4 +1,3 @@
-// const { getArticleByArticleId } = require("../controllers/articles.controller")
 const database = require("../db/connection")
 
 exports.requestArticleByArticleId = (requestedArticleId) => {
@@ -20,11 +19,10 @@ exports.requestArticleByArticleId = (requestedArticleId) => {
     FROM
     articles
 
-
     LEFT JOIN
     comments ON comments.article_id = articles.article_id
 
-    WHERE articles.article_id = ${requestedArticleId}
+    WHERE articles.article_id = $1
 
     GROUP BY
     articles.article_id
@@ -32,15 +30,15 @@ exports.requestArticleByArticleId = (requestedArticleId) => {
     ORDER BY
     articles.created_at DESC
     
-
-    ;`)
+    ;`, [requestedArticleId])
     
-    .then((result) => {
-               
-        return (result.rows[0])
+    .then(({rows}) => {
+
+        return (rows[0])
     })
 
     .catch((err) => {
+        console.log("hi")
         next(err)
     })
 }
@@ -71,8 +69,8 @@ exports.requestAllArticles = () => {
     ORDER BY
     articles.created_at DESC;`)
 
-    .then((result) => {
-        articlesObject = result.rows
+    .then(({rows}) => {
+        articlesObject = rows
         return (articlesObject)
     })
    
@@ -81,7 +79,6 @@ exports.requestAllArticles = () => {
     })
 
 }
-
 exports.requestArticlesByTopic = (requestedTopic) => {
 
     return database.query(`
@@ -111,21 +108,20 @@ exports.requestArticlesByTopic = (requestedTopic) => {
     articles.created_at DESC
     ;`, [requestedTopic])
 
-    .then((result) => {
-        articlesObject = result.rows
+    .then(({rows}) => {
+        articlesObject = rows
         return (articlesObject)
     })
 
 }
-
 exports.requestCommentsByArticleId = (requestedArticleId) => {
     return database.query(`
     SELECT * FROM comments WHERE article_id = ${requestedArticleId}
     ORDER BY created_at DESC
     ;`)
     
-    .then((result) => {
-        return (result.rows)
+    .then(({rows}) => {
+        return (rows)
     })
 
     .catch((err) => {
@@ -140,8 +136,8 @@ exports.insertComment = (userName, commentBody, articleId) => {
     RETURNING *;`,
     [userName, commentBody, articleId]
     )
-    .then((result) => {
-        return result.rows
+    .then(({rows}) => {
+        return rows[0]
     })
 
     .catch((err) => {
@@ -188,8 +184,8 @@ exports.updateVotes = (articleId, newTotalVotes) => {
     
     })
    
-    .then((result) => {
-        return result.rows[0]  
+    .then(({rows}) => {
+        return rows[0]  
     })
 
 
@@ -220,8 +216,8 @@ exports.requestArticlesByTopic = (requestedTopic) => {
     articles.created_at DESC
     ;`, [requestedTopic])
 
-    .then((result) => {
-        articlesObject = result.rows
+    .then(({rows}) => {
+        articlesObject = rows
         return (articlesObject)
     })
 }

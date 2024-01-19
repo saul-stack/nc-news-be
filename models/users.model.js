@@ -4,8 +4,22 @@ exports.requestAllUsers = () => {
 
     return database.query(`SELECT * from users;`)
 
-    .then((result) => {       
-        return result.rows
+    .then(({rows}) => {       
+        return rows
+    })
+
+}
+
+
+exports.requestUserByUserName = (requestedUserName) => {
+
+    return database.query(`
+    SELECT * FROM users
+    WHERE username = $1
+    `, [requestedUserName])
+    
+    .then(({rows}) => {
+        return (rows[0])
     })
 
 }

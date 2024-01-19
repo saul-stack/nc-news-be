@@ -7,23 +7,22 @@ exports.deleteComment = (requestedCommentId) => {
     WHERE comment_id = ${requestedCommentId};
     `)
 
-    .then((result) => {
-        return (result.rows)
+    .then(({rows}) => {
+        return (rows)
     })
 
 }
 
 exports.requestAllComments = () => {
 
-return database.query(`
-SELECT * FROM comments;
-`)
+    return database.query(`
+    SELECT * FROM comments;
+    `)
 
-.then((result) => {
+    .then(({rows}) => {
 
-    return (result.rows)
-})
-
+        return (rows)
+    })
 }
 
 exports.requestCommentByCommentId = (requestedCommentId) => {
@@ -32,9 +31,9 @@ exports.requestCommentByCommentId = (requestedCommentId) => {
     SELECT * FROM comments
     WHERE comment_id = ${requestedCommentId}
     `)
-
-    .then((result) => {
-        return (result.rows)
+    
+    .then(({rows}) => {
+        return (rows)
     })
 
 }
