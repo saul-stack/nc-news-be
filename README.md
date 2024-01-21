@@ -31,18 +31,17 @@ Setup
 
 ## Instructions to run locally:
 
-This api sends requests to a database stored locally.
+The API sends PSQL query requests to a *local database*.
+To configure the local database environment:
 
-To configure local database environments, *.env* files must be created at the root level of the repository;
+1. Navigate to the *root* level of the repository, and create a *.env* file:
 
-#### *.env.development*
-    PGDATABASE=<development_database_name>
+        $ touch .env.database_name
 
-and 
+    containing:
 
-#### *.env.test*
-    PGDATABASE=<test_database_name>
+        PGDATABASE=<database_name>
 
->replace *development_database_name* and *test_database_name* accordingly
+>replace *database_name* accordingly (development, test, production etc.)
 
 ****

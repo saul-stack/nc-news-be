@@ -4,8 +4,8 @@ exports.deleteComment = (requestedCommentId) => {
 
     return database.query(`
     DELETE FROM comments
-    WHERE comment_id = ${requestedCommentId};
-    `)
+    WHERE comment_id = $1;
+    `, [requestedCommentId])
 
     .then(({rows}) => {
         return (rows)
@@ -29,8 +29,8 @@ exports.requestCommentByCommentId = (requestedCommentId) => {
 
     return database.query(`
     SELECT * FROM comments
-    WHERE comment_id = ${requestedCommentId}
-    `)
+    WHERE comment_id = $1
+    `, [requestedCommentId])
     
     .then(({rows}) => {
         return (rows)

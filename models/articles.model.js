@@ -116,9 +116,9 @@ exports.requestArticlesByTopic = (requestedTopic) => {
 }
 exports.requestCommentsByArticleId = (requestedArticleId) => {
     return database.query(`
-    SELECT * FROM comments WHERE article_id = ${requestedArticleId}
+    SELECT * FROM comments WHERE article_id = $1
     ORDER BY created_at DESC
-    ;`)
+    ;`, [requestedArticleId])
     
     .then(({rows}) => {
         return (rows)
@@ -151,9 +151,9 @@ exports.updateVotes = (articleId, newTotalVotes) => {
 
     return database.query(`
     UPDATE articles
-    SET votes = (${newTotalVotes})
-    WHERE article_id = ${articleId}
-    `)
+    SET votes = $1
+    WHERE article_id = $2
+    `, [newTotalVotes, articleId])
 
     .then(() => {
     return database.query(`
@@ -175,12 +175,12 @@ exports.updateVotes = (articleId, newTotalVotes) => {
     LEFT JOIN
     comments ON comments.article_id = articles.article_id
 
-    WHERE articles.article_id = ${articleId}
+    WHERE articles.article_id = $1
 
     GROUP BY
     articles.article_id
 
-    `)
+    `, [articleId])
     
     })
    

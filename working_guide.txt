@@ -1,1 +1,3 @@
 // Change errors method to throw instead of calling return next()
+//spy on console.log
+//git hooks husky
