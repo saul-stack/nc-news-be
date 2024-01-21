@@ -36,12 +36,12 @@ To configure the local database environment:
 
 1. Navigate to the *root* level of the repository, and create a *.env* file:
 
-        $ touch .env.database_name
+        $ touch .env.<database_name>
 
     containing:
 
         PGDATABASE=<database_name>
 
->replace *database_name* accordingly (development, test, production etc.)
+>replace *<database_name>* accordingly (development, test, production etc.)
 
 ****
