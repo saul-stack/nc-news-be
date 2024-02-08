@@ -4,7 +4,6 @@ exports.requestArticleByArticleId = (requestedArticleId) => {
   return database
     .query(
       `
-
     SELECT
     articles.article_id,
     articles.body,
@@ -72,6 +71,7 @@ exports.requestArticles = (topic, sort_by = "created_at", order = "DESC") => {
         articles.article_id
       ORDER BY
         ${sort_by} ${order};`;
+  console.log(queryString);
 
   return database.query(queryString, params).then(({ rows }) => {
     return rows;
