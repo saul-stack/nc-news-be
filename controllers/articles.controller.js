@@ -26,7 +26,9 @@ exports.getArticleByArticleId = (request, response, next) => {
 exports.getArticles = (request, response) => {
   const requestedTopic = request.query.topic;
 
-  requestArticles(requestedTopic).then((articles) => {
+  const { topic, order, sort_by } = request.query;
+
+  requestArticles(topic, order, sort_by).then((articles) => {
     if (articles[0] === undefined) return response.status(404).send();
 
     return response.status(200).send({ articles });
