@@ -1,137 +1,121 @@
-const { requestArticleByArticleId, requestAllArticles, requestCommentsByArticleId, insertComment, updateVotes, requestArticlesByTopic} = require("../models/articles.model")
-const { requestUserByUserName } = require('../models/users.model')
+const {
+  requestArticleByArticleId,
+  requestAllArticles,
+  requestCommentsByArticleId,
+  insertComment,
+  updateVotes,
+  requestArticlesByTopic,
+  requestArticles,
+} = require("../models/articles.model");
+const { requestUserByUserName } = require("../models/users.model");
 
 exports.getArticleByArticleId = (request, response, next) => {
-    const requestedArticleId = request.params.article_id
+  const requestedArticleId = request.params.article_id;
 
-    if (isNaN(requestedArticleId)) throw ({"code": "400"})
-    
-    requestArticleByArticleId(requestedArticleId)
+  if (isNaN(requestedArticleId)) throw { code: "400" };
+
+  requestArticleByArticleId(requestedArticleId)
     .then((article) => {
-
-        if (article === undefined) throw ({code: "404"})
-       return response.status(200).send({article})
-
+      if (article === undefined) throw { code: "404" };
+      return response.status(200).send({ article });
     })
     .catch((err) => {
-        next(err)
-    })
-}
+      next(err);
+    });
+};
 exports.getArticles = (request, response) => {
+  const requestedTopic = request.query.topic;
 
+  requestArticles(requestedTopic).then((articles) => {
+    if (articles[0] === undefined) return response.status(404).send();
 
-    const requestedTopic = request.query.topic
-
-    if (requestedTopic) {
-
-        requestArticlesByTopic(requestedTopic)
-        .then((articles) => {
-            
-            if (articles[0] === undefined) return response.status(404).send()
-
-            return response.status(200).send({articles})
-        })
-    }
-
-    else {
-        requestAllArticles()
-        .then((articles) => {
-            return response.status(200).send({articles})
-        })
-    }
-}
+    return response.status(200).send({ articles });
+  });
+};
 exports.getCommentsByArticleId = (request, response, next) => {
+  const requestedArticleId = request.params.article_id;
 
-    const requestedArticleId = request.params.article_id
+  if (isNaN(requestedArticleId)) throw { code: "400" };
 
-    if (isNaN(requestedArticleId)) throw({"code": "400"})
-
-    requestCommentsByArticleId(requestedArticleId)
+  requestCommentsByArticleId(requestedArticleId)
     .then((comments) => {
-
-        if (comments[0] === undefined) return Promise.reject ({code: "404"})
-        return response.status(200).send(comments)
+      if (comments[0] === undefined) return Promise.reject({ code: "404" });
+      return response.status(200).send(comments);
     })
-    .catch((err)=> {
-        next(err)
-    })
-
-}
+    .catch((err) => {
+      next(err);
+    });
+};
 exports.postCommentByArticleId = (request, response, next) => {
+  const commentToPost = request.body;
+  const articleId = request.params.article_id;
 
-    const commentToPost = request.body
-    const articleId = request.params.article_id
-
-    requestArticleByArticleId(articleId)
+  requestArticleByArticleId(articleId)
     .then((requestedArticle) => {
-
-        if (requestedArticle === undefined) {
-            throw ({code: "404"})
-        }
+      if (requestedArticle === undefined) {
+        throw { code: "404" };
+      }
     })
     .catch((error) => {
-        next(error)
-    })
+      next(error);
+    });
 
-    
+  const { userName, body } = commentToPost;
 
+  if (
+    userName.length < 1 ||
+    body.length < 1 ||
+    typeof body != "string" ||
+    typeof userName != "string"
+  ) {
+    return next({ code: "400" });
+    // throw ({"code": "400"})
+  }
 
-    const {userName, body} = commentToPost
-
-    if( userName.length < 1     ||  body.length < 1                 ||
-        typeof body != "string" ||  typeof userName != "string"){
-
-        return next({"code": "400"})
-        // throw ({"code": "400"})
-    }
-
-    requestUserByUserName(userName)
+  requestUserByUserName(userName)
     .then((user) => {
-        if (user === undefined) throw ({code: "404"})
+      if (user === undefined) throw { code: "404" };
     })
     .catch((error) => {
-        next(error)
-    })
+      next(error);
+    });
 
-    insertComment(userName, body, articleId)
-    .then((comment) => { 
-        return response.status(201).send({comment})} 
-    )
+  insertComment(userName, body, articleId)
+    .then((comment) => {
+      return response.status(201).send({ comment });
+    })
     .catch((error) => {
-        next(error)
-    })
-
-}
+      next(error);
+    });
+};
 exports.patchArticleByArticleId = (request, response, next) => {
-    
-    const requestedArticleId = request.params.article_id
-    
-    
-    if (isNaN(Number(requestedArticleId))) return next(({ code: "400" }))
+  const requestedArticleId = request.params.article_id;
 
-    if (request.body.inc_votes === undefined    || 
-    request.body.inc_votes > 999                || 
-    request.body.inc_votes < -999) return next({code: "400"})
-    
-    requestArticleByArticleId(requestedArticleId)
+  if (isNaN(Number(requestedArticleId))) return next({ code: "400" });
 
+  if (
+    request.body.inc_votes === undefined ||
+    request.body.inc_votes > 999 ||
+    request.body.inc_votes < -999
+  )
+    return next({ code: "400" });
+
+  requestArticleByArticleId(requestedArticleId)
     .then((requestedArticle) => {
+      if (requestedArticle === undefined) throw { code: "404" };
 
-        if (requestedArticle === undefined) throw ({code: "404"})
+      let newTotalVotes = requestedArticle.votes + request.body.inc_votes;
 
-        let newTotalVotes = requestedArticle.votes + request.body.inc_votes
+      if (newTotalVotes < 1) {
+        newTotalVotes = 0;
+      }
 
-        if (newTotalVotes < 1) { newTotalVotes = 0 } 
-    
-        return updateVotes(requestedArticleId, newTotalVotes)
+      return updateVotes(requestedArticleId, newTotalVotes);
     })
     .then((article) => {
-        return response.status(200).send({article})
+      return response.status(200).send({ article });
     })
     .catch((error) => {
-        next(error)
-    })
-
-    
-
-}
+      next(error);
+    });
+};
