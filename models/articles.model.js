@@ -42,8 +42,16 @@ exports.requestArticleByArticleId = (requestedArticleId) => {
       next(err);
     });
 };
-
 exports.requestArticles = (topic, sort_by = "created_at", order = "DESC") => {
+  let legalSortByQueries = [
+    "author",
+    "topic",
+    "comment_count",
+    "votes",
+    "title",
+    "article_id",
+    "created_at",
+  ];
   let queryString = `
       SELECT
         articles.article_id,
@@ -69,8 +77,13 @@ exports.requestArticles = (topic, sort_by = "created_at", order = "DESC") => {
   queryString += `
       GROUP BY articles.article_id`;
 
-  queryString += `
+  if (legalSortByQueries.includes(sort_by)) {
+    queryString += `
       ORDER BY ${sort_by} ${order};`;
+  } else {
+    queryString += `
+      ORDER BY created_at ${order};`;
+  }
 
   console.log(queryString);
 
