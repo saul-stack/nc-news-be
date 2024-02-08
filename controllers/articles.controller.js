@@ -1,10 +1,8 @@
 const {
   requestArticleByArticleId,
-  requestAllArticles,
   requestCommentsByArticleId,
   insertComment,
   updateVotes,
-  requestArticlesByTopic,
   requestArticles,
 } = require("../models/articles.model");
 const { requestUserByUserName } = require("../models/users.model");
@@ -24,11 +22,11 @@ exports.getArticleByArticleId = (request, response, next) => {
     });
 };
 exports.getArticles = (request, response) => {
-  const requestedTopic = request.query.topic;
+  console.log(request.query);
 
-  const { topic, order, sort_by } = request.query;
+  const { topic, sort_by, order } = request.query;
 
-  requestArticles(topic, order, sort_by).then((articles) => {
+  requestArticles(topic, sort_by, order).then((articles) => {
     if (articles[0] === undefined) return response.status(404).send();
 
     return response.status(200).send({ articles });
