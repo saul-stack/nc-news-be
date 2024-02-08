@@ -56,7 +56,7 @@ exports.requestArticles = (topic, sort_by = "created_at", order = "DESC") => {
         COUNT(comments.comment_id) AS comment_count
       FROM
         articles
-      LEFT JOIN
+      LEFT OUTER JOIN
         comments ON comments.article_id = articles.article_id`;
 
   const params = [];
@@ -67,10 +67,11 @@ exports.requestArticles = (topic, sort_by = "created_at", order = "DESC") => {
   }
 
   queryString += `
-      GROUP BY
-        articles.article_id
-      ORDER BY
-        ${sort_by} ${order};`;
+      GROUP BY articles.article_id`;
+
+  queryString += `
+      ORDER BY ${sort_by} ${order};`;
+
   console.log(queryString);
 
   return database.query(queryString, params).then(({ rows }) => {
