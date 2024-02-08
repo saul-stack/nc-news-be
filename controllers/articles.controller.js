@@ -22,7 +22,9 @@ exports.getArticleByArticleId = (request, response, next) => {
     });
 };
 exports.getArticles = (request, response) => {
-  console.log(request.query);
+  //   console.log(request.query);
+  //   console.log(request.params);
+  //   unify getArticleByArticleId into this function, passing an object
 
   const { topic, sort_by, order } = request.query;
 
