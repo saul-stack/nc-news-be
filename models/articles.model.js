@@ -43,7 +43,7 @@ exports.requestArticleByArticleId = (requestedArticleId) => {
     });
 };
 exports.requestArticles = (topic, sort_by = "created_at", order = "DESC") => {
-  let legalSortByQueries = [
+  const legalSortByQueries = [
     "author",
     "topic",
     "comment_count",
@@ -52,20 +52,21 @@ exports.requestArticles = (topic, sort_by = "created_at", order = "DESC") => {
     "article_id",
     "created_at",
   ];
+
   let queryString = `
-      SELECT
-        articles.article_id,
-        articles.title,
-        articles.topic,
-        articles.author,
-        articles.created_at,
-        articles.votes,
-        article_img_url,
-        COUNT(comments.comment_id) AS comment_count
-      FROM
-        articles
-      LEFT OUTER JOIN
-        comments ON comments.article_id = articles.article_id`;
+    SELECT
+      articles.article_id,
+      articles.title,
+      articles.topic,
+      articles.author,
+      articles.created_at,
+      articles.votes,
+      article_img_url,
+      COUNT(comments.comment_id) AS comment_count
+    FROM
+      articles
+    LEFT OUTER JOIN
+      comments ON comments.article_id = articles.article_id`;
 
   const params = [];
 
@@ -75,8 +76,9 @@ exports.requestArticles = (topic, sort_by = "created_at", order = "DESC") => {
   }
 
   queryString += `
-      GROUP BY articles.article_id`;
+    GROUP BY articles.article_id`;
 
+  // Add sorting condition based on user input or default to "created_at"
   if (legalSortByQueries.includes(sort_by)) {
     queryString += `
       ORDER BY ${sort_by} ${order};`;
@@ -85,8 +87,7 @@ exports.requestArticles = (topic, sort_by = "created_at", order = "DESC") => {
       ORDER BY created_at ${order};`;
   }
 
-  console.log(queryString);
-
+  // Execute the query and return the result
   return database.query(queryString, params).then(({ rows }) => {
     return rows;
   });
